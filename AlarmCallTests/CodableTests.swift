@@ -6,27 +6,67 @@
 //
 
 import XCTest
+@testable import AlarmCall
 
 class CodableTests: XCTestCase {
-
+    var model: Alarm!
+    var copiedModel: Alarm!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        model = Alarm(comment: "test",
+              wakeUpDate: Date(),
+              deadlineDate: Date(),
+              notificationInterval: 1.2,
+              soundFileName: "sound",
+              repeatDays: [.monday])
+        
+        copiedModel = model
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        model = nil
+        copiedModel = nil
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testEqualEncodedDataWithModelAndCopiedModel() {
+        //when
+        let data = try? Coder.encode(model)
+        let secondData = try? Coder.encode(copiedModel)
+        
+        //then
+        XCTAssertEqual(data, secondData)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    func testEqualDecodedModelWithCopiedModel() {
+        //given
+        guard let data = try? Coder.encode(model),
+              let secondData = try? Coder.encode(copiedModel) else {
+            XCTFail("EncodingError")
+            return
         }
+        
+        //when
+        let model: Alarm? = try? Coder.model(encodedData: data)
+        let secondModel: Alarm? = try? Coder.model(encodedData: secondData)
+        
+        //then
+        XCTAssertEqual(model, secondModel)
     }
-
+    
+    func testNotEqualModelAndNewModel() {
+        //given
+        var newModel = model
+        
+        //when
+        newModel?.comment = "new model test"
+        
+        let data = try? Coder.encode(model)
+        let newModelData = try? Coder.encode(newModel)
+        
+        //then
+        XCTAssertNotEqual(data, newModelData)
+    }
+    
+    
 }
+
