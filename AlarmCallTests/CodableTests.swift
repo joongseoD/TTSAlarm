@@ -18,7 +18,8 @@ class CodableTests: XCTestCase {
               deadlineDate: Date(),
               notificationInterval: 1.2,
               soundFileName: "sound",
-              repeatDays: [.monday])
+              repeatDays: [.monday],
+              enable: false)
         
         copiedModel = model
     }

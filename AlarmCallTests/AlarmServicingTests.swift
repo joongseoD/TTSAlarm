@@ -14,7 +14,7 @@ class AlarmServicingTests: XCTestCase {
     
     override func setUpWithError() throws {
         service = MockAlarmService()
-        alarms = (0...4).map { Alarm(comment: "\($0)", wakeUpDate: nil, deadlineDate: nil, notificationInterval: nil, soundFileName: "\($0)", repeatDays: nil) }
+        alarms = (0...4).map { Alarm(comment: "\($0)", wakeUpDate: nil, deadlineDate: nil, notificationInterval: nil, soundFileName: "\($0)", repeatDays: nil, enable: false) }
     }
 
     override func tearDownWithError() throws {

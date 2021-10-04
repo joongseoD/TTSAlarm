@@ -15,7 +15,7 @@
 		258878952709816F000998A2 /* AlarmCallUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878942709816F000998A2 /* AlarmCallUITests.swift */; };
 		258878A6270AA6EF000998A2 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878A5270AA6EF000998A2 /* Alarm.swift */; };
 		258878A8270AADF2000998A2 /* CodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878A7270AADF2000998A2 /* CodableTests.swift */; };
-		258878AB270AAE99000998A2 /* Decoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878AA270AAE99000998A2 /* Decoder.swift */; };
+		258878AB270AAE99000998A2 /* Coder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878AA270AAE99000998A2 /* Coder.swift */; };
 		258878AD270AB8D1000998A2 /* DataBaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878AC270AB8D1000998A2 /* DataBaseManager.swift */; };
 		258878AF270ABF91000998A2 /* AlarmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878AE270ABF91000998A2 /* AlarmService.swift */; };
 		258878B3270ACF85000998A2 /* AlarmServicingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878B2270ACF85000998A2 /* AlarmServicingTests.swift */; };
@@ -57,7 +57,7 @@
 		258878962709816F000998A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		258878A5270AA6EF000998A2 /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		258878A7270AADF2000998A2 /* CodableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableTests.swift; sourceTree = "<group>"; };
-		258878AA270AAE99000998A2 /* Decoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decoder.swift; sourceTree = "<group>"; };
+		258878AA270AAE99000998A2 /* Coder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coder.swift; sourceTree = "<group>"; };
 		258878AC270AB8D1000998A2 /* DataBaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBaseManager.swift; sourceTree = "<group>"; };
 		258878AE270ABF91000998A2 /* AlarmService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmService.swift; sourceTree = "<group>"; };
 		258878B2270ACF85000998A2 /* AlarmServicingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmServicingTests.swift; sourceTree = "<group>"; };
@@ -125,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				258878A9270AAE4F000998A2 /* Utils */,
+				258878B4270AF8C3000998A2 /* Service */,
 				258878A4270AA6B6000998A2 /* Models */,
 				258878A3270AA670000998A2 /* ViewModels */,
 				258878A2270AA66A000998A2 /* Views */,
@@ -133,7 +134,6 @@
 				2588787B2709816F000998A2 /* Assets.xcassets */,
 				2588787D2709816F000998A2 /* LaunchScreen.storyboard */,
 				258878802709816F000998A2 /* Info.plist */,
-				258878AE270ABF91000998A2 /* AlarmService.swift */,
 			);
 			path = AlarmCall;
 			sourceTree = "<group>";
@@ -183,10 +183,18 @@
 		258878A9270AAE4F000998A2 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				258878AA270AAE99000998A2 /* Decoder.swift */,
+				258878AA270AAE99000998A2 /* Coder.swift */,
 				258878AC270AB8D1000998A2 /* DataBaseManager.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		258878B4270AF8C3000998A2 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				258878AE270ABF91000998A2 /* AlarmService.swift */,
+			);
+			path = Service;
 			sourceTree = "<group>";
 		};
 		A40FA7E3C0C80DC1410E772B /* Frameworks */ = {
@@ -470,7 +478,7 @@
 			files = (
 				258878732709816F000998A2 /* AppDelegate.swift in Sources */,
 				258878AF270ABF91000998A2 /* AlarmService.swift in Sources */,
-				258878AB270AAE99000998A2 /* Decoder.swift in Sources */,
+				258878AB270AAE99000998A2 /* Coder.swift in Sources */,
 				258878AD270AB8D1000998A2 /* DataBaseManager.swift in Sources */,
 				258878A6270AA6EF000998A2 /* Alarm.swift in Sources */,
 			);
