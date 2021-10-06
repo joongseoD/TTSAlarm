@@ -9,8 +9,8 @@ import Foundation
 
 struct Alarm: Codable, Equatable {
     let id: String
-    var comment: String?
-    var wakeUpDate: Date?
+    var comment: String
+    var wakeUpDate: Date
     var deadlineDate: Date?
     var notificationInterval: TimeInterval?
     var soundFileName: String?
@@ -25,9 +25,10 @@ struct Alarm: Codable, Equatable {
         case notificationInterval
         case soundFileName
         case repeatDays
+        case enable
     }
     
-    init(comment: String?, wakeUpDate: Date?, deadlineDate: Date?, notificationInterval: TimeInterval?, soundFileName: String, repeatDays: [DayOfWeek]?, enable: Bool) {
+    init(comment: String, wakeUpDate: Date, deadlineDate: Date?, notificationInterval: TimeInterval?, soundFileName: String, repeatDays: [DayOfWeek]?, enable: Bool) {
         self.id = UUID().uuidString
         self.comment = comment
         self.wakeUpDate = wakeUpDate
@@ -39,12 +40,12 @@ struct Alarm: Codable, Equatable {
     }
 }
 
-enum DayOfWeek: Int, Codable {
-    case sunday
-    case monday
-    case tuesday
-    case wednesday
-    case thursday
-    case friday
-    case saturday
+enum DayOfWeek: String, Codable {
+    case Sun
+    case Mon
+    case Tue
+    case Wed
+    case Thu
+    case Fri
+    case Sat
 }

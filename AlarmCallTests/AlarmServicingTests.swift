@@ -6,15 +6,23 @@
 //
 
 import XCTest
+import RxTest
+import RxBlocking
+import RxSwift
+import RxCocoa
+
 @testable import AlarmCall
 
 class AlarmServicingTests: XCTestCase {
+    
+    let testScheduler = TestScheduler(initialClock: 0)
+    var bag = DisposeBag()
     var service: AlarmServiging!
     var alarms: [Alarm]!
     
     override func setUpWithError() throws {
         service = MockAlarmService()
-        alarms = (0...4).map { Alarm(comment: "\($0)", wakeUpDate: nil, deadlineDate: nil, notificationInterval: nil, soundFileName: "\($0)", repeatDays: nil, enable: false) }
+        alarms = (0...4).map { Alarm(comment: "\($0)", wakeUpDate: Date(), deadlineDate: nil, notificationInterval: nil, soundFileName: "\($0)", repeatDays: nil, enable: false) }
     }
 
     override func tearDownWithError() throws {
@@ -25,116 +33,191 @@ class AlarmServicingTests: XCTestCase {
     func testAppendNewAlarm() {
         //given
         let alarms = alarms
-        do {
-            //when
-            try service.append(alarms!)
-            
-            //then
-            XCTAssertEqual(service.count, alarms!.count)
-        } catch {
-            let serviceError = error as? AlarmServiceError
-            XCTFail(serviceError?.description ?? "")
-        }
+        let result = testScheduler.createObserver(Int.self)
+        
+        //when
+        testScheduler.start()
+        service.append(alarms!)
+            .flatMap { [unowned self] _ in
+                self.service.alarmList()
+                    .catch { error in
+                        let serviceError = error as? AlarmServiceError
+                        XCTFail(serviceError?.description ?? "")
+                        return .just([])
+                    }
+            }
+            .map { $0.count }
+            .debug()
+            .bind(to: result)
+            .disposed(by: bag)
+        
+        //then
+        let expected = Recorded.events(
+            .next(0, alarms?.count ?? 0),
+            .completed(0)
+        )
+        XCTAssertEqual(result.events, expected)
+        testScheduler.stop()
     }
     
     func testFindAlarmAtEqualId() {
-        do {
-            //given
-            let firstAlarm = alarms.first!
-            try service.append(alarms)
+        //given
+        let firstAlarm = alarms.first!
+        service.append(alarms)
+            .subscribe(onNext: {})
+            .disposed(by: bag)
         
-            
-            //when
-            let foundAlarm = try service.alarm(with: firstAlarm.id)
-            print("# found \(foundAlarm) firstAlarm \(firstAlarm)")
-            
-            //then
-            XCTAssertEqual(foundAlarm, firstAlarm)
-
-        } catch {
-            let serviceError = error as? AlarmServiceError
-            XCTFail(serviceError?.description ?? "")
-        }
+        
+        //when
+        testScheduler.start()
+        let result = testScheduler.createObserver(Alarm.self)
+        service.alarm(with: firstAlarm.id)
+            .catch { error in
+                let serviceError = error as? AlarmServiceError
+                XCTFail(serviceError?.description ?? "")
+                return .empty()
+            }
+            .debug()
+            .bind(to: result)
+            .disposed(by: bag)
+        
+        
+        //then
+        let expected = Recorded.events(
+            .next(0, firstAlarm),
+            .completed(0)
+        )
+        
+        XCTAssertEqual(result.events, expected)
+        testScheduler.stop()
     }
     
     func testUpdateAlarm() {
-        do {
-            //given
-            var last = alarms.last!
-            try service.append(alarms)
-            
-            //when
-            last.comment = "UPDATE"
-            try service.update(last, id: last.id)
-            
-            //then
-            let alarm = try service.alarm(with: last.id)
-            XCTAssertEqual(alarm.comment, last.comment)
-            
-        } catch {
-            let serviceError = error as? AlarmServiceError
-            XCTFail(serviceError?.description ?? "")
-        }
+        
+        //given
+        var last = alarms.last!
+        service.append(alarms)
+            .subscribe(onNext: {})
+            .disposed(by: bag)
+        
+        //when
+        last.comment = "UPDATE"
+        testScheduler.start()
+        let result = testScheduler.createObserver(Alarm.self)
+        Observable.just(last)
+            .flatMap { [unowned self] alarm in
+                self.service.update(alarm, id: alarm.id)
+                    .catch { error in
+                        let serviceError = error as? AlarmServiceError
+                        XCTFail(serviceError?.description ?? "")
+                        return .just(())
+                    }
+            }
+            .flatMap { [unowned self] _ in
+                self.service.alarm(with: last.id)
+                    .catch { error in
+                        let serviceError = error as? AlarmServiceError
+                        XCTFail(serviceError?.description ?? "")
+                        return .empty()
+                    }
+            }
+            .bind(to: result)
+            .disposed(by: bag)
+        
+        //then
+        let expected = Recorded.events(
+            .next(0, last),
+            .completed(0)
+        )
+        
+        XCTAssertEqual(result.events, expected)
+        testScheduler.stop()
     }
     
     func testDeleteAlarm() {
-        do {
-            //given
-            let last = alarms.last!
-            try service.append(alarms)
-            
-            //when
-            try service.delete(id: last.id)
-            
-            //then
-            let alarmList = service.alarmList()
-            XCTAssert(!alarmList.contains(last))
-            XCTAssertThrowsError(try service.alarm(with: last.id))
-            
-        } catch {
-            let serviceError = error as? AlarmServiceError
-            XCTFail(serviceError?.description ?? "")
-        }
+        
+        //given
+        let last = alarms.last!
+        service.append(alarms)
+            .subscribe(onNext: {})
+            .disposed(by: bag)
+        
+        //when
+        testScheduler.start()
+        let result = testScheduler.createObserver(Bool.self)
+        Observable.just(last.id)
+            .flatMap { [unowned self] id in
+                self.service.delete(id: id)
+                    .catch { error in
+                        let serviceError = error as? AlarmServiceError
+                        XCTFail(serviceError?.description ?? "")
+                        return .just(())
+                    }
+            }
+            .flatMap { [unowned self] in
+                self.service.alarmList()
+            }
+            .map { $0.contains(last) }
+            .bind(to: result)
+            .disposed(by: bag)
+        
+        //then
+        let expected = Recorded.events(
+            .next(0, false),
+            .completed(0)
+        )
+        
+        XCTAssertEqual(result.events, expected)
+        testScheduler.stop()
     }
 }
 
 final class MockAlarmService: AlarmServiging {
-    
     private let dbms = MockDataBaseManager<String, Data>(key: .AlarmList)
     
-    func append(_ items: [Alarm]) throws {
+    func append(_ items: [Alarm]) -> Observable<Void> {
         for item in items {
-            try append(item)
+            guard let encodedData = try? Coder.encode(item) else { return .error(AlarmServiceError.encode) }
+            dbms.append(newData: encodedData, id: item.id)
         }
+        return .just(())
     }
     
-    func append(_ alarm: Alarm) throws {
-        guard let encodedData = try? Coder.encode(alarm) else { throw AlarmServiceError.encode }
+    func append(_ alarm: Alarm) -> Observable<Void> {
+        guard let encodedData = try? Coder.encode(alarm) else { return .error(AlarmServiceError.encode) }
         dbms.append(newData: encodedData, id: alarm.id)
+        return .just(())
     }
     
-    func alarmList() -> [Alarm] {
-        guard let datas = dbms.allData() else { return [] }
-        
-        return datas.compactMap { data -> Alarm? in
-            try? alarm(with: data.key)
+    func alarmList() -> Observable<[Alarm]> {
+        guard let datas = dbms.allData() else { return .just([]) }
+        let models = datas.compactMap { data -> Alarm? in
+            return try? Coder.model(encodedData: data.value)
+        }
+        return .just(models)
+    }
+    
+    func alarm(with id: String) -> Observable<Alarm> {
+        return alarmList()
+            .compactMap {
+                return $0.filter { $0.id == id }.first
+            }
+    }
+    
+    func update(_ alarm: Alarm, id: String) -> Observable<Void> {
+        guard let data = try? Coder.encode(alarm) else { return .error(AlarmServiceError.encode) }
+        if dbms.update(data, id: id) {
+            return .just(())
+        } else {
+            return .error(AlarmServiceError.notFound)
         }
     }
     
-    func alarm(with id: String) throws -> Alarm {
-        guard let data = dbms.select(with: id) else { throw AlarmServiceError.notFound }
-        return try Coder.model(encodedData: data)
-    }
-    
-    @discardableResult
-    func update(_ alarm: Alarm, id: String) throws -> Bool {
-        guard let data = try? Coder.encode(alarm) else { throw AlarmServiceError.encode }
-        return dbms.update(data, id: id)
-    }
-    
-    func delete(id: String) throws {
-        if dbms.delete(with: id) == nil {
-            throw AlarmServiceError.notFound
+    func delete(id: String) -> Observable<Void> {
+        if dbms.delete(with: id) != nil {
+            return .just(())
+        } else {
+            return .error(AlarmServiceError.notFound)
         }
     }
 }

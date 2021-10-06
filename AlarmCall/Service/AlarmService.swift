@@ -5,7 +5,7 @@
 //  Created by Damor on 2021/10/04.
 //
 
-import Foundation
+import RxSwift
 
 enum AlarmServiceError: Error, CustomStringConvertible {
     case encode
@@ -22,67 +22,126 @@ enum AlarmServiceError: Error, CustomStringConvertible {
 }
 
 protocol AlarmServiging {
-    func append(_ items: [Alarm]) throws
+    func append(_ items: [Alarm]) -> Observable<Void>
     
-    func append(_ alarm: Alarm) throws
+    func append(_ alarm: Alarm) -> Observable<Void>
     
-    func alarmList() -> [Alarm]
+    func alarmList() -> Observable<[Alarm]>
     
-    func alarm(with id: String) throws -> Alarm
+    func alarm(with id: String) -> Observable<Alarm>
     
-    @discardableResult
-    func update(_ alarm: Alarm, id: String) throws -> Bool
+    func update(_ alarm: Alarm, id: String) -> Observable<Void>
     
-    func delete(id: String) throws
-}
-
-extension AlarmServiging {
-    var count: Int {
-        return alarmList().count
-    }
-    
-    var isEmpty: Bool {
-        return count == 0
-    }
+    func delete(id: String) -> Observable<Void>
 }
 
 final class AlarmService: AlarmServiging {
     
     private let dbms = DataBaseManager<String, Data>(key: .AlarmList)
     
-    func append(_ items: [Alarm]) throws {
-        for item in items {
-            try append(item)
+    func append(_ items: [Alarm]) -> Observable<Void> {
+        return Observable<Void>.create { [weak self] observer in
+            for item in items {
+                guard let encodedData = try? Coder.encode(item) else {
+                    observer.onError(AlarmServiceError.encode)
+                    return Disposables.create()
+                }
+                self?.dbms.append(newData: encodedData, id: item.id)
+            }
+            observer.onNext(())
+            observer.onCompleted()
+            return Disposables.create()
         }
     }
     
-    func append(_ alarm: Alarm) throws {
-        guard let encodedData = try? Coder.encode(alarm) else { throw AlarmServiceError.encode }
-        dbms.append(newData: encodedData, id: alarm.id)
+    func append(_ alarm: Alarm) -> Observable<Void> {
+        return Observable<Void>.create { [weak self] observer in
+            guard let encodedData = try? Coder.encode(alarm) else {
+                observer.onError(AlarmServiceError.encode)
+                return Disposables.create()
+            }
+            self?.dbms.append(newData: encodedData, id: alarm.id)
+            observer.onNext(())
+            observer.onCompleted()
+            
+            return Disposables.create()
+        }
     }
     
-    func alarmList() -> [Alarm] {
-        guard let datas = dbms.allData() else { return [] }
+    
+    func alarmList() -> Observable<[Alarm]> {
+        return Observable.create { [weak self] observer in
+            guard let self = self,
+                  let datas = self.dbms.allData() else {
+                observer.onNext([])
+                observer.onCompleted()
+                return Disposables.create()
+            }
+            
+            let alarmList = datas.compactMap { data -> Alarm? in
+                try? self.findAlarm(data.key)
+            }
+            .sorted(by: { $0.wakeUpDate < $1.wakeUpDate })
+            observer.onNext(alarmList)
+            observer.onCompleted()
+            
+            return Disposables.create()
+        }
         
-        return datas.compactMap { data -> Alarm? in
-            try? alarm(with: data.key)
+    }
+    
+    func alarm(with id: String) -> Observable<Alarm> {
+        return Observable<Alarm>.create { [weak self] observer in
+            guard let self = self else { return Disposables.create() }
+            
+            do {
+                let model = try self.findAlarm(id)
+                observer.onNext(model)
+                observer.onCompleted()
+            } catch {
+                observer.onError(AlarmServiceError.notFound)
+            }
+            return Disposables.create()
         }
     }
     
-    func alarm(with id: String) throws -> Alarm {
+    private func findAlarm(_ id: String) throws -> Alarm {
         guard let data = dbms.select(with: id) else { throw AlarmServiceError.notFound }
         return try Coder.model(encodedData: data)
     }
     
-    @discardableResult
-    func update(_ alarm: Alarm, id: String) throws -> Bool {
-        guard let data = try? Coder.encode(alarm) else { throw AlarmServiceError.encode }
-        return dbms.update(data, id: id)
+    func update(_ alarm: Alarm, id: String) -> Observable<Void> {
+        return Observable<Void>.create { [weak self] observer in
+            guard let self = self, let data = try? Coder.encode(alarm) else {
+                observer.onError(AlarmServiceError.encode)
+                return Disposables.create()
+            }
+            
+            
+            
+            if self.dbms.update(data, id: id) {
+                observer.onNext(())
+                observer.onCompleted()
+            } else {
+                observer.onError(AlarmServiceError.notFound)
+            }
+            
+            return Disposables.create()
+        }
     }
     
-    func delete(id: String) throws {
-        if dbms.delete(with: id) == nil {
-            throw AlarmServiceError.notFound
+    func delete(id: String) -> Observable<Void> {
+        return Observable<Void>.create { [weak self] observer in
+            guard let self = self else { return Disposables.create() }
+            if self.dbms.delete(with: id) == nil {
+                observer.onError(AlarmServiceError.notFound)
+            } else {
+                observer.onNext(())
+                observer.onCompleted()
+            }
+            
+            return Disposables.create()
         }
+        
     }
 }
