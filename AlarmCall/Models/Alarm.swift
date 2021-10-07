@@ -12,7 +12,7 @@ struct Alarm: Codable, Equatable {
     var comment: String
     var wakeUpDate: Date
     var deadlineDate: Date?
-    var notificationInterval: TimeInterval?
+    var notificationIntervalMinute: Int?
     var soundFileName: String?
     var repeatDays: [DayOfWeek]?
     var enable: Bool = false
@@ -22,18 +22,18 @@ struct Alarm: Codable, Equatable {
         case comment
         case wakeUpDate
         case deadlineDate
-        case notificationInterval
+        case notificationIntervalMinute
         case soundFileName
         case repeatDays
         case enable
     }
     
-    init(comment: String, wakeUpDate: Date, deadlineDate: Date?, notificationInterval: TimeInterval?, soundFileName: String, repeatDays: [DayOfWeek]?, enable: Bool) {
+    init(comment: String, wakeUpDate: Date, deadlineDate: Date?, notificationIntervalMinute: Int?, soundFileName: String?, repeatDays: [DayOfWeek]?, enable: Bool) {
         self.id = UUID().uuidString
         self.comment = comment
         self.wakeUpDate = wakeUpDate
         self.deadlineDate = deadlineDate
-        self.notificationInterval = notificationInterval
+        self.notificationIntervalMinute = notificationIntervalMinute
         self.soundFileName = soundFileName
         self.repeatDays = repeatDays
         self.enable = enable
