@@ -28,6 +28,8 @@
 		256EB59927102F2F00500F0B /* EditViewModelDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB59827102F2F00500F0B /* EditViewModelDataSource.swift */; };
 		256EB59B27102F5800500F0B /* EditViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB59A27102F5800500F0B /* EditViewModelType.swift */; };
 		256EB59D27102FB200500F0B /* EditAlarmSelectableTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB59C27102FB200500F0B /* EditAlarmSelectableTableViewCell.swift */; };
+		256EB59F27104D3700500F0B /* EditAlarmCommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB59E27104D3700500F0B /* EditAlarmCommentViewController.swift */; };
+		256EB5A127104D4D00500F0B /* EditAlarmCommentVIewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB5A027104D4D00500F0B /* EditAlarmCommentVIewModel.swift */; };
 		258878732709816F000998A2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258878722709816F000998A2 /* AppDelegate.swift */; };
 		2588787A2709816F000998A2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 258878782709816F000998A2 /* Main.storyboard */; };
 		2588787C2709816F000998A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2588787B2709816F000998A2 /* Assets.xcassets */; };
@@ -91,6 +93,8 @@
 		256EB59827102F2F00500F0B /* EditViewModelDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditViewModelDataSource.swift; sourceTree = "<group>"; };
 		256EB59A27102F5800500F0B /* EditViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditViewModelType.swift; sourceTree = "<group>"; };
 		256EB59C27102FB200500F0B /* EditAlarmSelectableTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAlarmSelectableTableViewCell.swift; sourceTree = "<group>"; };
+		256EB59E27104D3700500F0B /* EditAlarmCommentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAlarmCommentViewController.swift; sourceTree = "<group>"; };
+		256EB5A027104D4D00500F0B /* EditAlarmCommentVIewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAlarmCommentVIewModel.swift; sourceTree = "<group>"; };
 		2588786F2709816F000998A2 /* AlarmCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AlarmCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		258878722709816F000998A2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		258878792709816F000998A2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -275,6 +279,7 @@
 				25931CC4270C2BD8007FA36E /* AlarmDetailViewController.swift */,
 				256EB590271006F600500F0B /* EditAlarmRepeatDaysViewController.swift */,
 				256EB59227102CD900500F0B /* EditAlarmIntervalViewController.swift */,
+				256EB59E27104D3700500F0B /* EditAlarmCommentViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -286,6 +291,7 @@
 				25931CC6270C2BEB007FA36E /* AlarmDetailViewModel.swift */,
 				256EB59427102D1300500F0B /* EditAlarmRepeatDaysViewModel.swift */,
 				256EB59627102D3F00500F0B /* EditAlarmIntervalViewModel.swift */,
+				256EB5A027104D4D00500F0B /* EditAlarmCommentVIewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -599,6 +605,7 @@
 			files = (
 				256EB59727102D3F00500F0B /* EditAlarmIntervalViewModel.swift in Sources */,
 				256EB59927102F2F00500F0B /* EditViewModelDataSource.swift in Sources */,
+				256EB5A127104D4D00500F0B /* EditAlarmCommentVIewModel.swift in Sources */,
 				256E31E8270D35430045A1F0 /* TestToSpeechRecorder.swift in Sources */,
 				258878B8270C1615000998A2 /* MainViewController.swift in Sources */,
 				256EB58C270EDF9C00500F0B /* AlarmDetailTableViewCellType.swift in Sources */,
@@ -623,6 +630,7 @@
 				256EB59527102D1300500F0B /* EditAlarmRepeatDaysViewModel.swift in Sources */,
 				258878BA270C161E000998A2 /* MainViewModel.swift in Sources */,
 				256EB585270EDF3600500F0B /* AlarmDetailSelectTableViewCell.swift in Sources */,
+				256EB59F27104D3700500F0B /* EditAlarmCommentViewController.swift in Sources */,
 				256EB587270EDF5500500F0B /* AlarmDetailDatePickerTableViewCell.swift in Sources */,
 				256EB59B27102F5800500F0B /* EditViewModelType.swift in Sources */,
 				25382C10270D439400BB2C36 /* AlarmReservationCenter.swift in Sources */,

@@ -43,16 +43,6 @@ final class MainViewController: UIViewController, ViewControllerType {
         bindViewModel()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-//        let recorder = TestToSpeechRecorder()
-//        recorder.speack("진아 중서야 오늘은 절대 늦으면 안되는 주일이야. 명일이 오빠가 늦지 말라고 쿠사리줬잖아. 이번에도 늦으면 진심 양심없는 애들로 찍히고 말거야. 명심이 언니 표정 봤니?")
-////        recorder.saveRecordFile()
-//
-//        let center = AlarmReservationCenter()
-//        center.reserve(Alarm(comment: "안녕", wakeUpDate: Date(),
-//                             deadlineDate: Date(), notificationIntervalMinute: 7, soundFileName: "HI", repeatDays: [], enable: true))
-    }
-    
     private func setUpNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.tintColor = .systemPink

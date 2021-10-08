@@ -96,6 +96,15 @@ final class AlarmDetailViewModel: ViewModelType {
         }
     }()
     
+    private lazy var changedComment: ((String) -> Void)? = { [weak self] in
+        guard let self = self else { return nil }
+        return { comment in
+            var alarm = self._currentAlarm.value
+            alarm.comment = comment
+            self._currentAlarm.accept(alarm)
+        }
+    }()
+    
     deinit {
         print("\(String(describing: self)) deinit")
     }
@@ -112,17 +121,11 @@ extension AlarmDetailViewModel {
                     
                     switch row {
                     case .interval:
-                        if let dataSource = viewModel.editIntervalDataSource {
-                            return .editInterval(dataSource: dataSource)
-                        } else {
-                            return nil
-                        }
+                        return .editInterval(dataSource: viewModel.editIntervalDataSource)
                     case .repeat:
-                        if let dataSource = viewModel.editRepeatDaysDataSource {
-                            return .editRepeatDays(dataSource: dataSource)
-                        } else {
-                            return nil
-                        }
+                        return .editRepeatDays(dataSource: viewModel.editRepeatDaysDataSource)
+                    case .comment:
+                        return .editComment(previous: viewModel._currentAlarm.value.comment, completion: viewModel.changedComment)
                     default:
                         return nil
                     }
@@ -188,7 +191,7 @@ extension AlarmDetailViewModel {
 
 //MARK: - Private Computed Properties
 extension AlarmDetailViewModel {
-    private var editIntervalDataSource: EditViewModelDataSource<Int>? {
+    private var editIntervalDataSource: EditViewModelDataSource<Int> {
         var intervals: [Int] = []
         if let interval = _currentAlarm.value.notificationIntervalMinute {
             intervals = [interval]
@@ -203,13 +206,24 @@ extension AlarmDetailViewModel {
         return dataSource
     }
     
-    private var editRepeatDaysDataSource: EditViewModelDataSource<DayOfWeek>? {
+    private var editRepeatDaysDataSource: EditViewModelDataSource<DayOfWeek> {
         let repeatDays = _currentAlarm.value.repeatDays ?? []
         
         let dataSource = EditViewModelDataSource(values: DayOfWeek.allCases, previousValues: repeatDays) { [weak self] days in
             guard let self = self else { return }
             var alarm = self._currentAlarm.value
             alarm.repeatDays = days
+            self._currentAlarm.accept(alarm)
+        }
+        return dataSource
+    }
+    
+    private var editCommentDataSource: EditViewModelDataSource<String> {
+        let currentComment = _currentAlarm.value.comment
+        let dataSource = EditViewModelDataSource(values: [], previousValues: [currentComment]) { [weak self] comment in
+            guard let self = self else { return }
+            var alarm = self._currentAlarm.value
+            alarm.comment = comment.first ?? currentComment
             self._currentAlarm.accept(alarm)
         }
         return dataSource

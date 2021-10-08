@@ -19,7 +19,10 @@ final class TestToSpeechRecorder: NSObject {
     func speack(_ text: String) {
         utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
-    
+        //TODO: 설정에서 조절 가능하도록 
+        utterance.rate = 0.41
+        utterance.pitchMultiplier = 0.7
+        utterance.volume = 1
         try? AVAudioSession.sharedInstance().setCategory(.playback, options: .allowBluetooth)
         synthesizer.speak(utterance)
     }

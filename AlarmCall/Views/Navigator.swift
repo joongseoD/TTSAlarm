@@ -19,6 +19,7 @@ enum Destination {
     case alarmDetail(id: String?, completion: (() -> Void)?)
     case editRepeatDays(dataSource: EditViewModelDataSource<DayOfWeek>)
     case editInterval(dataSource: EditViewModelDataSource<Int>)
+    case editComment(previous: String, completion: ((String) -> Void)?)
     
     var viewController: ViewControllerType {
         switch self {
@@ -41,6 +42,11 @@ enum Destination {
             let editIntervalVC = EditAlarmIntervalViewController()
             editIntervalVC.viewModel = viewModel as? EditAlarmIntervalViewModel
             return editIntervalVC
+        
+        case .editComment:
+            let editCommentVC = EditAlarmCommentViewController()
+            editCommentVC.viewModel = viewModel as? EditAlarmCommentViewModel
+            return editCommentVC
         }
     }
     
@@ -54,6 +60,8 @@ enum Destination {
             return EditAlarmRepeatDaysViewModel(dataSource: dataSource)
         case let .editInterval(dataSource):
             return EditAlarmIntervalViewModel(dataSource: dataSource)
+        case let .editComment(previous, completion):
+            return EditAlarmCommentViewModel(previous: previous, completion: completion)
         }
     }
 }
