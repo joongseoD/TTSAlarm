@@ -67,8 +67,10 @@ final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTabl
         titleLabel.text = viewModel.title
         datePicker.date = viewModel.date ?? Date()
         
-        datePicker.rx.date
-            .asObservable()
+        datePicker.rx.controlEvent(.valueChanged)
+            .compactMap { [weak self] in
+                return self?.datePicker.date
+            }
             .distinctUntilChanged()
             .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind(to: viewModel.changedDate)
