@@ -5,9 +5,11 @@
 //  Created by Damor on 2021/10/07.
 //
 
-import Foundation
+import RxSwift
 
-struct AlarmDetailDateSectionViewModel: AlarmDetailSectionViewModelType {
+struct AlarmDetailDateSectionViewModel: AlarmDetailSectionViewModelType, ConvenyingChangedDate {
     var title: String
     var date: Date?
+    
+    var changedDate = PublishSubject<Date>()
 }

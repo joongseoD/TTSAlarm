@@ -49,6 +49,7 @@ struct AlarmCellModel {
         
         self.comment = model.comment
         self.repeatDays = model.repeatDays?
+            .sorted(by: <)
             .map { $0.rawValue }
             .reduce("", { $0 + " " + $1 }) ?? ""
         self.isOn = model.enable

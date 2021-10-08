@@ -7,7 +7,7 @@
 
 import RxSwift
 
-final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTableViewCellType, ConvenyingChangedDate {
+final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTableViewCellType {
     
     lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -66,6 +66,13 @@ final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTabl
         guard let viewModel = viewModel as? AlarmDetailDateSectionViewModel else { return }
         titleLabel.text = viewModel.title
         datePicker.date = viewModel.date ?? Date()
+        
+        datePicker.rx.date
+            .asObservable()
+            .distinctUntilChanged()
+            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+            .bind(to: viewModel.changedDate)
+            .disposed(by: bag)
     }
     
     required init?(coder: NSCoder) {
@@ -76,6 +83,4 @@ final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTabl
         super.prepareForReuse()
         bag = DisposeBag()
     }
-    
-    var changedDate = PublishSubject<Date>()
 }

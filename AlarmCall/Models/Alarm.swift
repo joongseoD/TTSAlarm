@@ -40,7 +40,7 @@ struct Alarm: Codable, Equatable {
     }
 }
 
-enum DayOfWeek: String, Codable {
+enum DayOfWeek: String, Codable, CaseIterable, Comparable {
     case Sun
     case Mon
     case Tue
@@ -48,4 +48,20 @@ enum DayOfWeek: String, Codable {
     case Thu
     case Fri
     case Sat
+    
+    private var index: Int {
+        return DayOfWeek.allCases.firstIndex(of: self) ?? 0
+    }
+    
+    static func < (lhs: DayOfWeek, rhs: DayOfWeek) -> Bool {
+        return lhs.index < rhs.index
+    }
+}
+
+enum NotificationInterval: Int, CaseIterable {
+    case one = 1
+    case three = 3
+    case five = 4
+    case seven = 7
+    case ten = 10
 }

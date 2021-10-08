@@ -81,6 +81,10 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
         tableView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
+        tableView.rx.itemSelected
+            .bind(to: viewModel.selectedIndex)
+            .disposed(by: disposeBag)
+        
         viewModel.sectionModels
             .drive(tableView.rx.items(dataSource: datasource))
             .disposed(by: disposeBag)
@@ -88,6 +92,12 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
         viewModel.currentAlarm
             .drive(onNext: { [weak self] alarm in
                 self?.navigationItem.title = alarm == nil ? "New Alarm" : "Edit Alarm"
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.moveToEdit
+            .drive(onNext: { [weak self] in
+                self?.navigationController?.transition(to: $0)
             })
             .disposed(by: disposeBag)
     }

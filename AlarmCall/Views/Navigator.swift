@@ -17,6 +17,8 @@ protocol ViewModelType {
 enum Destination {
     case main
     case alarmDetail(id: String?)
+    case editRepeatDays(dataSource: EditViewModelDataSource<DayOfWeek>)
+    case editInterval(dataSource: EditViewModelDataSource<Int>)
     
     var viewController: ViewControllerType {
         switch self {
@@ -29,6 +31,16 @@ enum Destination {
             let detailVC = AlarmDetailViewController()
             detailVC.viewModel = viewModel as? AlarmDetailViewModel
             return detailVC
+            
+        case .editRepeatDays:
+            let editCommentVC = EditAlarmRepeatDaysViewController()
+            editCommentVC.viewModel = viewModel as? EditAlarmRepeatDaysViewModel
+            return editCommentVC
+        
+        case .editInterval:
+            let editIntervalVC = EditAlarmIntervalViewController()
+            editIntervalVC.viewModel = viewModel as? EditAlarmIntervalViewModel
+            return editIntervalVC
         }
     }
     
@@ -38,6 +50,10 @@ enum Destination {
             return MainViewModel()
         case let .alarmDetail(id):
             return AlarmDetailViewModel(alarmId: id)
+        case let .editRepeatDays(dataSource):
+            return EditAlarmRepeatDaysViewModel(dataSource: dataSource)
+        case let .editInterval(dataSource):
+            return EditAlarmIntervalViewModel(dataSource: dataSource)
         }
     }
 }
