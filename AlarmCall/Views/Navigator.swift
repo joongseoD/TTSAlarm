@@ -16,7 +16,7 @@ protocol ViewModelType {
 
 enum Destination {
     case main
-    case alarmDetail(id: String?)
+    case alarmDetail(id: String?, completion: (() -> Void)?)
     case editRepeatDays(dataSource: EditViewModelDataSource<DayOfWeek>)
     case editInterval(dataSource: EditViewModelDataSource<Int>)
     
@@ -48,8 +48,8 @@ enum Destination {
         switch self {
         case .main:
             return MainViewModel()
-        case let .alarmDetail(id):
-            return AlarmDetailViewModel(alarmId: id)
+        case let .alarmDetail(id, completion):
+            return AlarmDetailViewModel(alarmId: id, completion: completion)
         case let .editRepeatDays(dataSource):
             return EditAlarmRepeatDaysViewModel(dataSource: dataSource)
         case let .editInterval(dataSource):

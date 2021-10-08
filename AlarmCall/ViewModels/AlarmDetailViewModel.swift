@@ -22,6 +22,12 @@ final class AlarmDetailViewModel: ViewModelType {
         return _currentAlarm.asDriver(onErrorJustReturn: defaultAlarm)
     }
     
+    private var alarmId: String?
+    
+    var isEditMode: Bool {
+        return alarmId != nil
+    }
+    
     private var defaultAlarm: Alarm {
         Alarm(comment: "Alarm", wakeUpDate: Date(), deadlineDate: nil, notificationIntervalMinute: nil, soundFileName: nil, repeatDays: nil, enable: false)
     }
@@ -91,8 +97,12 @@ final class AlarmDetailViewModel: ViewModelType {
     
     private var bag = DisposeBag()
     
-    init(service: AlarmServiging = AlarmService(), alarmId: String?) {
+    private var alarmCompletion: (() -> Void)?
+    
+    init(service: AlarmServiging = AlarmService(), alarmId: String?, completion: (() -> Void)?) {
         self.service = service
+        self.alarmId = alarmId
+        self.alarmCompletion = completion
         
         setUp()
         setUpCurrentAlarm(alarmId)
@@ -174,5 +184,29 @@ final class AlarmDetailViewModel: ViewModelType {
     
     var toggleDeadline: Bool {
         return _toggleDeadline.value
+    }
+    
+    var submitAlarm: Binder<Void> {
+        return Binder(self) { viewModel, _ in
+            viewModel.service.append(viewModel._currentAlarm.value)
+                .catch { error in
+                    print("## error", error.localizedDescription)
+                    //TODO: 에러처리
+                    return .empty()
+                }
+                .subscribe(onNext: {
+                    viewModel._completeSubmit.onNext(())
+                })
+                .disposed(by: viewModel.bag)
+        }
+    }
+    
+    private let _completeSubmit = PublishSubject<Void>()
+    var completeSubmit: Observable<Void> {
+        return _completeSubmit
+            .do(onNext: { [weak self] in
+                self?.alarmCompletion?()
+            })
+            .asObservable()
     }
 }

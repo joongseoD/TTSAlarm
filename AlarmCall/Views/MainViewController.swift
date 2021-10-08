@@ -107,7 +107,7 @@ final class MainViewController: UIViewController, ViewControllerType {
     }
     
     private func transition(model: Alarm?) {
-        navigationController?.transition(to: .alarmDetail(id: model?.id))
+        navigationController?.transition(to: .alarmDetail(id: model?.id, completion: viewModel.refresh))
     }
     
     deinit {

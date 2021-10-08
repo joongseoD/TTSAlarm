@@ -52,7 +52,7 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
     private func setUpNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.tintColor = .systemPink
-        navigationItem.title = "Alarm Detail"
+        navigationItem.title = viewModel.isEditMode ? "Edit Alarm" : "New Alarm"
         navigationItem.largeTitleDisplayMode = .automatic
         navigationItem.rightBarButtonItem = doneButton
     }
@@ -89,15 +89,19 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
             .drive(tableView.rx.items(dataSource: datasource))
             .disposed(by: disposeBag)
         
-        viewModel.currentAlarm
-            .drive(onNext: { [weak self] alarm in
-                self?.navigationItem.title = alarm == nil ? "New Alarm" : "Edit Alarm"
-            })
-            .disposed(by: disposeBag)
-        
         viewModel.moveToEdit
             .drive(onNext: { [weak self] in
                 self?.navigationController?.transition(to: $0)
+            })
+            .disposed(by: disposeBag)
+        
+        doneButton.rx.tap
+            .bind(to: viewModel.submitAlarm)
+            .disposed(by: disposeBag)
+        
+        viewModel.completeSubmit
+            .subscribe(onNext: { [weak self] in
+                self?.navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)
     }

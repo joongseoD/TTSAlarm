@@ -27,6 +27,12 @@ final class MainViewModel: ViewModelType {
     }()
     
     private var disposeBag = DisposeBag()
+    private let _refresh = PublishSubject<Void>()
+    lazy var refresh: (() -> Void)? = { [weak self] in
+        return {
+            self?._refresh.onNext(())
+        }
+    }()
     
     init(service: AlarmServiging = AlarmService()) {
         self.service = service
@@ -39,16 +45,11 @@ final class MainViewModel: ViewModelType {
     }
     
     private func setUp() {
-        /*
-        service.append([
-            Alarm(comment: "일어나 쉐키야~~1", wakeUpDate: Date(), deadlineDate: Date(), notificationInterval: 1.6, soundFileName: "file1", repeatDays: [.Mon, .Tue], enable: true),
-            Alarm(comment: "일어나 쉐키야~~2", wakeUpDate: Date(), deadlineDate: Date(), notificationInterval: 1.6, soundFileName: "file1", repeatDays: [.Mon, .Tue], enable: false),
-            Alarm(comment: "일어나 쉐키야~~3", wakeUpDate: Date(), deadlineDate: Date(), notificationInterval: 1.6, soundFileName: "file1", repeatDays: [.Mon, .Fri], enable: false)
-        ])
-            .subscribe(onNext: {})
-            .disposed(by: disposeBag)
-        */
-        service.alarmList()
+        Observable.merge(Observable.just(()), _refresh)
+            .flatMap { [weak self] _ -> Observable<[Alarm]> in
+                guard let self = self else { return .empty() }
+                return self.service.alarmList()
+            }
             .bind(to: _alarmList)
             .disposed(by: disposeBag)
         
