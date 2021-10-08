@@ -15,6 +15,7 @@ final class MainViewModel: ViewModelType {
     private let _alarmList = BehaviorRelay<[Alarm]>(value: [])
     private let _message = PublishSubject<String>()
     private let _selectedIndex = PublishSubject<Int>()
+    private let _refresh = PublishSubject<Void>()
     
     lazy var selectedAlarm: Driver<Alarm> = {
         return _selectedIndex
@@ -26,13 +27,13 @@ final class MainViewModel: ViewModelType {
             .compactMap { $0 }
     }()
     
-    private var disposeBag = DisposeBag()
-    private let _refresh = PublishSubject<Void>()
     lazy var refresh: (() -> Void)? = { [weak self] in
         return {
             self?._refresh.onNext(())
         }
     }()
+    
+    private var disposeBag = DisposeBag()
     
     init(service: AlarmServiging = AlarmService()) {
         self.service = service
@@ -63,6 +64,7 @@ final class MainViewModel: ViewModelType {
     }
 }
 
+//MARK: - Output Interface
 extension MainViewModel {
     var alarmSectionModel: Driver<[AlarmSectionModel]> {
         return _alarmSectionModel.asDriver(onErrorJustReturn: [])
@@ -73,6 +75,7 @@ extension MainViewModel {
     }
 }
 
+//MARK: - Input Interface
 extension MainViewModel {
     func toggle(_ alarmId: String, isOn: Bool) {
         Observable.just(alarmId)
