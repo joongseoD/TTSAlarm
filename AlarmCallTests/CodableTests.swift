@@ -16,7 +16,7 @@ class CodableTests: XCTestCase {
         model = Alarm(comment: "test",
               wakeUpDate: Date(),
               deadlineDate: Date(),
-              notificationInterval: 1.2,
+              notificationIntervalMinute: 1,
               soundFileName: "sound",
               repeatDays: [.Mon],
               enable: false)
