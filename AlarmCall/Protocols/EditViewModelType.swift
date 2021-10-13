@@ -14,6 +14,7 @@ protocol EditViewModelType: AnyObject {
     var dataSource: EditViewModelDataSource<Element> { get set }
     
     var _values: BehaviorRelay<[WrappedItem<Element>]> { get set }
+    
     var _changedValues: PublishSubject<[Element]> { get set }
     
     var bag: DisposeBag { get set }

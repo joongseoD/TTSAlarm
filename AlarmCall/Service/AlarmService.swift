@@ -51,6 +51,7 @@ final class AlarmService: AlarmServiging {
             observer.onNext(())
             observer.onCompleted()
             return Disposables.create()
+            
         }
     }
     

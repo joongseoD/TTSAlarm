@@ -49,8 +49,13 @@ final class AlarmDetailViewModel: ViewModelType {
         Observable.combineLatest(_currentAlarm, _toggleDeadline)
             .map { [weak self] alarm, toggle -> [AlarmDetailSectionModel] in
                 guard let self = self else { return [] }
-                let deadlineSectionItems: [AlarmDetailSection] = toggle ? [.deadlineDate(self.deadlineDateViewModel(alarm.deadlineDate)),
-                                                                           .interval(.init(title: "알람주기", value: AlarmCellModel(model: alarm).interval))] : []
+                
+                var deadlineSectionItems: [AlarmDetailSection] = []
+                if toggle {
+                    deadlineSectionItems =  [.deadlineDate(self.deadlineDateViewModel(alarm.deadlineDate)),
+                                             .interval(.init(title: "알람주기", value: AlarmCellModel(model: alarm).interval))]
+                }
+                
                 return [
                     AlarmDetailSectionModel(header: .none, items: [.wakeUpDate(self.wakeUpDateViewModel(alarm.wakeUpDate)),
                                                                    .repeat(.init(title: "반복", value: AlarmCellModel(model: alarm).repeatDays)),
