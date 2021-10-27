@@ -8,26 +8,31 @@
 import RxSwift
 import RxCocoa
 
-final class EditAlarmCommentViewModel: ViewModelType {
+protocol EditAlarmCommentViewModelDependency {
+    var previousComment: String { get }
+    var editCompletion: ((String) -> Void)? { get }
+}
+
+final class EditAlarmCommentViewModel: ViewModel {
     private let _comment = PublishSubject<String>()
     private let _submit = PublishSubject<Void>()
     private let _editCompleted = PublishSubject<Void>()
     private let _speakVoice = PublishSubject<Void>()
     private var bag = DisposeBag()
-    
+    private let dependency: EditAlarmCommentViewModelDependency
     private var completion: ((String) -> Void)?
     let previousComment: String
-    private lazy var voice: TestToSpeechRecorder = {
-        let voice = TestToSpeechRecorder()
-        
-        return voice
-    }()
     
-    init(previous: String, completion: ((String) -> Void)?) {
-        self.previousComment = previous
-        self.completion = completion
+    init(dependency: EditAlarmCommentViewModelDependency) {
+        self.dependency = dependency
+        self.previousComment = dependency.previousComment
+        self.completion = dependency.editCompletion
         
         setUp()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
     
     private func setUp() {
@@ -41,8 +46,9 @@ final class EditAlarmCommentViewModel: ViewModelType {
         
         _speakVoice
             .withLatestFrom(_comment)
-            .subscribe(onNext: { [weak self] comment in
-                self?.voice.speack(comment)
+            .subscribe(onNext: { comment in
+                let voice = TTSRecorder(text: comment)
+                voice.speack()
             })
             .disposed(by: bag)
     }

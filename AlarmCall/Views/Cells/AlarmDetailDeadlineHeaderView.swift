@@ -9,7 +9,7 @@ import RxSwift
 
 final class AlarmDetailDeadlineHeaderView: UITableViewHeaderFooterView {
     
-    lazy var titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .left
@@ -17,7 +17,7 @@ final class AlarmDetailDeadlineHeaderView: UITableViewHeaderFooterView {
         return label
     }()
     
-    lazy var toggleSwitch: UISwitch = {
+    let toggleSwitch: UISwitch = {
         let toggle = UISwitch()
         toggle.tintColor = .systemPink
         return toggle
@@ -30,6 +30,10 @@ final class AlarmDetailDeadlineHeaderView: UITableViewHeaderFooterView {
         
         setUpAppearence()
         setUpLayout()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
     
     private func setUpAppearence() {

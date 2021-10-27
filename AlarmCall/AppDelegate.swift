@@ -23,12 +23,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func setUpRootViewController() {
         let navigationController = UINavigationController()
-//        navigationController.navigationBar.isHidden = true
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
         
-        navigationController.transition(to: .main, operation: .root)
+        let component = RootComponent(servicing: AlarmService())
+        navigationController.transition(to: .main(component: component), operation: .root)
     }
 //
 //    func applicationWillResignActive(_ application: UIApplication) {

@@ -8,7 +8,11 @@
 import RxSwift
 import RxCocoa
 
-final class EditAlarmRepeatDaysViewModel: EditViewModelType, ViewModelType {
+protocol EditAlarmRepeatDaysViewModelDependency {
+    var dataSource: EditViewModelDataSource<DayOfWeek> { get }
+}
+
+final class EditAlarmRepeatDaysViewModel: EditViewModelType {
     
     typealias Element = DayOfWeek
     
@@ -20,34 +24,33 @@ final class EditAlarmRepeatDaysViewModel: EditViewModelType, ViewModelType {
     
     private let selectedElements: BehaviorRelay<[Element]>
     
+    private let dependency: EditAlarmRepeatDaysViewModelDependency
+    
     var selectedIndex: Binder<IndexPath> {
         return Binder<IndexPath>(self) { viewModel, indexPath in
-            Observable.just(indexPath.item)
-                .withLatestFrom(viewModel._values) { selectedIndex, values -> WrappedItem<Element> in
-                    return values[selectedIndex]
-                }
-                .withLatestFrom(viewModel.selectedElements) { wrappedItem, selectedValues -> [Element] in
-                    var previousValues = selectedValues
-                    if let index = previousValues.firstIndex(where: { $0 == wrappedItem.item }) {
-                        previousValues.remove(at: index)
-                    } else {
-                        previousValues.append(wrappedItem.item)
-                    }
-                    return previousValues
-                }
-                .subscribe(onNext: { items in
-                    viewModel.selectedElements.accept(items)
-                    viewModel.changeValues(items)
-                })
-                .disposed(by: viewModel.bag)
+            let wrappedItem = viewModel._values.value[indexPath.item]
+            var previousValues = viewModel.selectedElements.value
+            if let index = previousValues.firstIndex(where: { $0 == wrappedItem.item }) {
+                previousValues.remove(at: index)
+            } else {
+                previousValues.append(wrappedItem.item)
+            }
+            
+            viewModel.selectedElements.accept(previousValues)
+            viewModel.changeValues(previousValues)
         }
     }
     
     var bag = DisposeBag()
     
-    init(dataSource: EditViewModelDataSource<Element>) {
-        self.dataSource = dataSource
+    init(dependency: EditAlarmRepeatDaysViewModelDependency) {
+        self.dependency = dependency
+        self.dataSource = dependency.dataSource
         self.selectedElements = BehaviorRelay<[Element]>(value: dataSource.previousValues ?? [])
         bindDataSource()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
 }

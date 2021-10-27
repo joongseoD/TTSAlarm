@@ -69,6 +69,10 @@ final class AlarmTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        print("deinit \(String(describing: self))")
+    }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         

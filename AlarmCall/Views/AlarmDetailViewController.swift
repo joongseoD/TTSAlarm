@@ -10,11 +10,9 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class AlarmDetailViewController: UIViewController, ViewControllerType {
+final class AlarmDetailViewController: UIViewController, ViewController {
     
-    var viewModel: AlarmDetailViewModel!
-    
-    lazy var tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         AlarmDetailSection.allCases.forEach {
             tableView.register($0.cellType, forCellReuseIdentifier: $0.reuseIdentifier)
@@ -29,7 +27,7 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
         return tableView
     }()
     
-    lazy var doneButton: UIBarButtonItem = {
+    private let doneButton: UIBarButtonItem = {
         let button = UIBarButtonItem()
         button.style = .done
         button.title = "완료"
@@ -38,6 +36,17 @@ class AlarmDetailViewController: UIViewController, ViewControllerType {
     
     private var datasource: RxTableViewSectionedReloadDataSource<AlarmDetailSectionModel>!
     private var disposeBag = DisposeBag()
+    
+    private let viewModel: AlarmDetailViewModel
+    
+    init(viewModel: AlarmDetailViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

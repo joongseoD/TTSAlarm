@@ -17,7 +17,6 @@ class CodableTests: XCTestCase {
               wakeUpDate: Date(),
               deadlineDate: Date(),
               notificationIntervalMinute: 1,
-              soundFileName: "sound",
               repeatDays: [.Mon],
               enable: false)
         

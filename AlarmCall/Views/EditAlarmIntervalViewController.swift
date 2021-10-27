@@ -10,9 +10,9 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class EditAlarmIntervalViewController: UIViewController, ViewControllerType {
+class EditAlarmIntervalViewController: UIViewController, ViewController {
 
-    lazy var tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(EditAlarmSelectableTableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.rowHeight = 100
@@ -23,9 +23,21 @@ class EditAlarmIntervalViewController: UIViewController, ViewControllerType {
         return tableView
     }()
     
-    var viewModel: EditAlarmIntervalViewModel!
+    private var bag = DisposeBag()
+    private let viewModel: EditAlarmIntervalViewModel
     
-    var bag = DisposeBag()
+    init(viewModel: EditAlarmIntervalViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

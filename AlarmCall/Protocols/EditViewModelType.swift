@@ -8,7 +8,7 @@
 import RxSwift
 import RxCocoa
 
-protocol EditViewModelType: AnyObject {
+protocol EditViewModelType: ViewModel {
     associatedtype Element: Equatable
 
     var dataSource: EditViewModelDataSource<Element> { get set }
@@ -18,8 +18,6 @@ protocol EditViewModelType: AnyObject {
     var _changedValues: PublishSubject<[Element]> { get set }
     
     var bag: DisposeBag { get set }
-    
-    init(dataSource: EditViewModelDataSource<Element>)
     
     func bindDataSource()
     

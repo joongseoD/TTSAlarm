@@ -10,9 +10,9 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class EditAlarmRepeatDaysViewController: UIViewController, ViewControllerType {
+class EditAlarmRepeatDaysViewController: UIViewController, ViewController {
 
-    lazy var tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(EditAlarmSelectableTableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.rowHeight = 100
@@ -23,9 +23,22 @@ class EditAlarmRepeatDaysViewController: UIViewController, ViewControllerType {
         return tableView
     }()
     
-    var viewModel: EditAlarmRepeatDaysViewModel!
+    private var bag = DisposeBag()
     
-    var bag = DisposeBag()
+    private let viewModel: EditAlarmRepeatDaysViewModel
+    
+    init(viewModel: EditAlarmRepeatDaysViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

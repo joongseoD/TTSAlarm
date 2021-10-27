@@ -7,62 +7,33 @@
 
 import UIKit
 
-protocol ViewControllerType where Self: UIViewController {
-    
-}
-protocol ViewModelType {
-    
-}
+protocol ViewController: UIViewController { }
+
+protocol ViewModel: AnyObject { }
 
 enum Destination {
-    case main
-    case alarmDetail(id: String?, completion: (() -> Void)?)
-    case editRepeatDays(dataSource: EditViewModelDataSource<DayOfWeek>)
-    case editInterval(dataSource: EditViewModelDataSource<Int>)
-    case editComment(previous: String, completion: ((String) -> Void)?)
+    case main(component: MainViewModelDependency)
+    case alarmDetail(component: AlarmDetailViewModelDependency)
+    case editRepeatDays(component: EditAlarmRepeatDaysViewModelDependency)
+    case editInterval(component: EditAlarmIntervalViewModelDependency)
+    case editComment(component: EditAlarmCommentViewModelDependency)
     
-    var viewController: ViewControllerType {
+    var viewController: ViewController {
+        var viewController: ViewController
         switch self {
-        case .main:
-            let mainViewController = MainViewController()
-            mainViewController.viewModel = viewModel as? MainViewModel
-            return mainViewController
-            
-        case .alarmDetail:
-            let detailVC = AlarmDetailViewController()
-            detailVC.viewModel = viewModel as? AlarmDetailViewModel
-            return detailVC
-            
-        case .editRepeatDays:
-            let editCommentVC = EditAlarmRepeatDaysViewController()
-            editCommentVC.viewModel = viewModel as? EditAlarmRepeatDaysViewModel
-            return editCommentVC
-        
-        case .editInterval:
-            let editIntervalVC = EditAlarmIntervalViewController()
-            editIntervalVC.viewModel = viewModel as? EditAlarmIntervalViewModel
-            return editIntervalVC
-        
-        case .editComment:
-            let editCommentVC = EditAlarmCommentViewController()
-            editCommentVC.viewModel = viewModel as? EditAlarmCommentViewModel
-            return editCommentVC
+        case let .main(component):
+            viewController = MainViewController(viewModel: .init(dependency: component))
+        case let .alarmDetail(component):
+            viewController = AlarmDetailViewController(viewModel: .init(dependency: component))
+        case let .editRepeatDays(component):
+            viewController = EditAlarmRepeatDaysViewController(viewModel: .init(dependency: component))
+        case let .editInterval(component):
+            viewController = EditAlarmIntervalViewController(viewModel: .init(dependency: component))
+        case let .editComment(component):
+            viewController = EditAlarmCommentViewController(viewModel: .init(dependency: component))
         }
-    }
-    
-    private var viewModel: ViewModelType {
-        switch self {
-        case .main:
-            return MainViewModel()
-        case let .alarmDetail(id, completion):
-            return AlarmDetailViewModel(alarmId: id, completion: completion)
-        case let .editRepeatDays(dataSource):
-            return EditAlarmRepeatDaysViewModel(dataSource: dataSource)
-        case let .editInterval(dataSource):
-            return EditAlarmIntervalViewModel(dataSource: dataSource)
-        case let .editComment(previous, completion):
-            return EditAlarmCommentViewModel(previous: previous, completion: completion)
-        }
+        
+        return viewController
     }
 }
 

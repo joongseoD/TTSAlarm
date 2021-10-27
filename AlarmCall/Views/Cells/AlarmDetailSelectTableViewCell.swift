@@ -10,14 +10,14 @@ import RxSwift
 
 final class AlarmDetailSelectTableViewCell: UITableViewCell, AlarmDetailTableViewCellType {
     
-    lazy var titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .left
         return label
     }()
     
-    lazy var valueLabel: UILabel = {
+    let valueLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .right
@@ -31,6 +31,10 @@ final class AlarmDetailSelectTableViewCell: UITableViewCell, AlarmDetailTableVie
         
         setUpAppearence()
         setUpLayout()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
     
     private func setUpAppearence() {

@@ -11,7 +11,7 @@ import RxCocoa
 
 final class NavigationBarView: UIView {
     
-    private lazy var containerView: UIView = {
+    private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .darkGray
         return view
@@ -29,20 +29,20 @@ final class NavigationBarView: UIView {
         return stackView
     }()
     
-    private lazy var titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .semibold)
         label.textAlignment = .center
         return label
     }()
     
-    fileprivate lazy var leftButton: UIButton = {
+    fileprivate let leftButton: UIButton = {
         let backButton = UIButton()
         backButton.setTitle("Back", for: .normal)
         return backButton
     }()
     
-    fileprivate lazy var rightButton: UIButton = {
+    fileprivate let rightButton: UIButton = {
         let optionButton = UIButton()
         optionButton.alpha = 0
         optionButton.setTitle("option", for: .normal)
@@ -84,11 +84,12 @@ final class NavigationBarView: UIView {
     
     private func setUpLayout() {
         addSubview(containerView)
+        addSubview(stackView)
+        
         containerView.snp.makeConstraints { make in
             make.edges.equalTo(self)
         }
         
-        addSubview(stackView)
         stackView.snp.makeConstraints { make in
             make.top.equalTo(self.safeAreaLayoutGuide.snp.top)
             make.leading.equalTo(self).offset(15)

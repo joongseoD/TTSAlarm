@@ -10,11 +10,9 @@ import RxCocoa
 import RxDataSources
 import SnapKit
 
-final class MainViewController: UIViewController, ViewControllerType {
+final class MainViewController: UIViewController, ViewController {
     
-    typealias ViewModel = MainViewModel
-    
-    lazy var tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(AlarmTableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.rowHeight = 100
@@ -25,14 +23,25 @@ final class MainViewController: UIViewController, ViewControllerType {
         return tableView
     }()
     
-    lazy var addButton: UIBarButtonItem = {
-        let button = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewAlarm))
+    private let addButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: nil)
         return button
     }()
     
     private var datasources: RxTableViewSectionedReloadDataSource<AlarmSectionModel>!
-    var viewModel: MainViewModel!
+    
     private var disposeBag = DisposeBag()
+    
+    private let viewModel: MainViewModel
+    
+    init(viewModel: MainViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,19 +94,19 @@ final class MainViewController: UIViewController, ViewControllerType {
             .bind(to: viewModel.selectedIndex)
             .disposed(by: disposeBag)
         
-        viewModel.selectedAlarm
+        viewModel.detailComponent
             .drive(onNext: { [weak self] in
-                self?.transition(model: $0)
+                self?.transition(with: $0)
             })
+            .disposed(by: disposeBag)
+        
+        addButton.rx.tap
+            .bind(to: viewModel.addAlarmButtonTapped)
             .disposed(by: disposeBag)
     }
     
-    @objc private func addNewAlarm() {
-        transition(model: nil)
-    }
-    
-    private func transition(model: Alarm?) {
-        navigationController?.transition(to: .alarmDetail(id: model?.id, completion: viewModel.refresh))
+    private func transition(with component: AlarmDetailViewModelDependency) {
+        navigationController?.transition(to: .alarmDetail(component: component))
     }
     
     deinit {

@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		25382C10270D439400BB2C36 /* AlarmReservationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25382C0F270D439400BB2C36 /* AlarmReservationCenter.swift */; };
+		256A4C6F27292F4D004CE519 /* AudioFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256A4C6E27292F4D004CE519 /* AudioFileManager.swift */; };
 		256E31E3270C60540045A1F0 /* AlarmTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256E31E2270C60540045A1F0 /* AlarmTableViewCell.swift */; };
 		256E31E6270C60A30045A1F0 /* AlarmSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256E31E5270C60A30045A1F0 /* AlarmSectionModel.swift */; };
-		256E31E8270D35430045A1F0 /* TestToSpeechRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256E31E7270D35430045A1F0 /* TestToSpeechRecorder.swift */; };
+		256E31E8270D35430045A1F0 /* TTSRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256E31E7270D35430045A1F0 /* TTSRecorder.swift */; };
 		256EB57A270EDE3B00500F0B /* AlarmDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB579270EDE3B00500F0B /* AlarmDetailSection.swift */; };
 		256EB57C270EDE5B00500F0B /* AlarmDetailSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB57B270EDE5B00500F0B /* AlarmDetailSectionModel.swift */; };
 		256EB57E270EDEA800500F0B /* AlarmDetailSectionViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256EB57D270EDEA800500F0B /* AlarmDetailSectionViewModelType.swift */; };
@@ -73,9 +74,10 @@
 /* Begin PBXFileReference section */
 		182826FD83F6A3C6D30A8873 /* Pods_AlarmCall_AlarmCallUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AlarmCall_AlarmCallUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		25382C0F270D439400BB2C36 /* AlarmReservationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmReservationCenter.swift; sourceTree = "<group>"; };
+		256A4C6E27292F4D004CE519 /* AudioFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileManager.swift; sourceTree = "<group>"; };
 		256E31E2270C60540045A1F0 /* AlarmTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmTableViewCell.swift; sourceTree = "<group>"; };
 		256E31E5270C60A30045A1F0 /* AlarmSectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSectionModel.swift; sourceTree = "<group>"; };
-		256E31E7270D35430045A1F0 /* TestToSpeechRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestToSpeechRecorder.swift; sourceTree = "<group>"; };
+		256E31E7270D35430045A1F0 /* TTSRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSRecorder.swift; sourceTree = "<group>"; };
 		256EB579270EDE3B00500F0B /* AlarmDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmDetailSection.swift; sourceTree = "<group>"; };
 		256EB57B270EDE5B00500F0B /* AlarmDetailSectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmDetailSectionModel.swift; sourceTree = "<group>"; };
 		256EB57D270EDEA800500F0B /* AlarmDetailSectionViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmDetailSectionViewModelType.swift; sourceTree = "<group>"; };
@@ -318,8 +320,9 @@
 			isa = PBXGroup;
 			children = (
 				258878AE270ABF91000998A2 /* AlarmService.swift */,
-				256E31E7270D35430045A1F0 /* TestToSpeechRecorder.swift */,
+				256E31E7270D35430045A1F0 /* TTSRecorder.swift */,
 				25382C0F270D439400BB2C36 /* AlarmReservationCenter.swift */,
+				256A4C6E27292F4D004CE519 /* AudioFileManager.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -606,7 +609,7 @@
 				256EB59727102D3F00500F0B /* EditAlarmIntervalViewModel.swift in Sources */,
 				256EB59927102F2F00500F0B /* EditViewModelDataSource.swift in Sources */,
 				256EB5A127104D4D00500F0B /* EditAlarmCommentVIewModel.swift in Sources */,
-				256E31E8270D35430045A1F0 /* TestToSpeechRecorder.swift in Sources */,
+				256E31E8270D35430045A1F0 /* TTSRecorder.swift in Sources */,
 				258878B8270C1615000998A2 /* MainViewController.swift in Sources */,
 				256EB58C270EDF9C00500F0B /* AlarmDetailTableViewCellType.swift in Sources */,
 				258878732709816F000998A2 /* AppDelegate.swift in Sources */,
@@ -637,6 +640,7 @@
 				25931CC7270C2BEB007FA36E /* AlarmDetailViewModel.swift in Sources */,
 				256E31E3270C60540045A1F0 /* AlarmTableViewCell.swift in Sources */,
 				256EB59327102CD900500F0B /* EditAlarmIntervalViewController.swift in Sources */,
+				256A4C6F27292F4D004CE519 /* AudioFileManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

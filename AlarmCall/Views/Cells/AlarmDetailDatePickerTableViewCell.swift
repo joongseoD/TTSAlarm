@@ -9,14 +9,14 @@ import RxSwift
 
 final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTableViewCellType {
     
-    lazy var titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .left
         return label
     }()
     
-    lazy var datePicker: UIDatePicker = {
+    let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         if #available(iOS 13.4, *) {
             picker.preferredDatePickerStyle = .wheels
@@ -72,13 +72,17 @@ final class AlarmDetailDatePickerTableViewCell: UITableViewCell, AlarmDetailTabl
                 return self?.datePicker.date
             }
             .distinctUntilChanged()
-            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+            .debounce(.milliseconds(100), scheduler: MainScheduler.instance)
             .bind(to: viewModel.changedDate)
             .disposed(by: bag)
     }
     
     required init?(coder: NSCoder) {
         fatalError()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
     
     override func prepareForReuse() {

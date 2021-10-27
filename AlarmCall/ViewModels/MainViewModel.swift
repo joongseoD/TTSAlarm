@@ -8,23 +8,57 @@
 import RxSwift
 import RxCocoa
 
-final class MainViewModel: ViewModelType {
+protocol MainViewModelDependency: AnyObject {
+    var servicing: AlarmServiging { get }
+}
+
+final class RootComponent: MainViewModelDependency {
+    var servicing: AlarmServiging
     
+    init(servicing: AlarmServiging) {
+        self.servicing = servicing
+    }
+}
+
+final class MainComponent: AlarmDetailViewModelDependency {
+    var servicing: AlarmServiging
+    var alarmId: String?
+    var editCompletion: (() -> Void)?
+
+    init(servicing: AlarmServiging, alarmId: String?, editCompletion: (() -> Void)?) {
+        self.servicing = servicing
+        self.alarmId = alarmId
+        self.editCompletion = editCompletion
+    }
+}
+
+final class MainViewModel: ViewModel {
     private let service: AlarmServiging
     private let _alarmSectionModel = BehaviorSubject<[AlarmSectionModel]>(value: [])
     private let _alarmList = BehaviorRelay<[Alarm]>(value: [])
     private let _message = PublishSubject<String>()
     private let _selectedIndex = PublishSubject<Int>()
     private let _refresh = PublishSubject<Void>()
+    private let _addNewAlarm = PublishSubject<Void>()
     
-    lazy var selectedAlarm: Driver<Alarm> = {
-        return _selectedIndex
+    lazy var detailComponent: Driver<AlarmDetailViewModelDependency> = {
+        let selectedAlarm = _selectedIndex
             .withLatestFrom(_alarmList) { index, list -> Alarm? in
                 guard list.indices.contains(index) else { return nil }
                 return list[index]
             }
-            .asDriver(onErrorJustReturn: nil)
-            .compactMap { $0 }
+            
+        let moveToNewAlarm = _addNewAlarm.map { Optional<Alarm>(nil) }
+            
+        return Observable.merge(selectedAlarm, moveToNewAlarm)
+            .map {
+                MainComponent(servicing: AlarmService(), alarmId: $0?.id) { [weak self] in
+                    self?._refresh.onNext(())
+                }
+            }
+            .asDriver { _ in
+                return .empty()
+            }
     }()
     
     lazy var refresh: (() -> Void)? = { [weak self] in
@@ -34,9 +68,11 @@ final class MainViewModel: ViewModelType {
     }()
     
     private var disposeBag = DisposeBag()
+    private let dependency: MainViewModelDependency
     
-    init(service: AlarmServiging = AlarmService()) {
-        self.service = service
+    init(dependency: MainViewModelDependency) {
+        self.dependency = dependency
+        self.service = dependency.servicing
         
         setUp()
     }
@@ -111,6 +147,12 @@ extension MainViewModel {
     var selectedIndex: Binder<IndexPath> {
         return Binder(self) { viewModel, indexPath in
             viewModel._selectedIndex.onNext(indexPath.row)
+        }
+    }
+    
+    var addAlarmButtonTapped: Binder<Void> {
+        return Binder(self) { viewModel, _ in
+            viewModel._addNewAlarm.onNext(())
         }
     }
 }

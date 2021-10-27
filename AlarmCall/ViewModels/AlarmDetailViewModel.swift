@@ -8,24 +8,49 @@
 import RxSwift
 import RxCocoa
 
-final class AlarmDetailViewModel: ViewModelType {
+protocol AlarmDetailViewModelDependency: AnyObject {
+    var servicing: AlarmServiging { get }
+    var alarmId: String? { get }
+    var editCompletion: (() -> Void)? { get }
+}
+
+struct EditRepeatDaysComponent: EditAlarmRepeatDaysViewModelDependency {
+    var dataSource: EditViewModelDataSource<DayOfWeek>
+}
+
+struct EditIntervalComponent: EditAlarmIntervalViewModelDependency {
+    var dataSource: EditViewModelDataSource<Int>
+}
+
+struct EditCommentComponent: EditAlarmCommentViewModelDependency {
+    var previousComment: String
+    
+    var editCompletion: ((String) -> Void)?
+}
+
+final class AlarmDetailViewModel: ViewModel {
     private let service: AlarmServiging
     private let _sectionModels = BehaviorRelay<[AlarmDetailSectionModel]>(value: [])
     private let _toggleDeadline = BehaviorRelay<Bool>(value: false)
     private let _moveToEdit = BehaviorRelay<Destination?>(value: nil)
     private let _completeSubmit = PublishSubject<Void>()
-    private lazy var _currentAlarm: BehaviorRelay<Alarm> = { [unowned self] in
-        return BehaviorRelay<Alarm>(value: self.defaultAlarm)
+    private let defaultAlarm = Alarm(comment: "Alarm", wakeUpDate: Date(), deadlineDate: nil, notificationIntervalMinute: nil, repeatDays: nil, enable: false)
+    
+    private lazy var _currentAlarm: BehaviorRelay<Alarm> = {
+        return BehaviorRelay<Alarm>(value: defaultAlarm)
     }()
     
     private var alarmId: String?
     private var alarmCompletion: (() -> Void)?
     private var bag = DisposeBag()
+    private var dataConveyingBag = DisposeBag()
+    private let dependency: AlarmDetailViewModelDependency
     
-    init(service: AlarmServiging = AlarmService(), alarmId: String?, completion: (() -> Void)?) {
-        self.service = service
-        self.alarmId = alarmId
-        self.alarmCompletion = completion
+    init(dependency: AlarmDetailViewModelDependency) {
+        self.dependency = dependency
+        self.service = dependency.servicing
+        self.alarmId = dependency.alarmId
+        self.alarmCompletion = dependency.editCompletion
         
         setUp()
         setUpCurrentAlarm(alarmId)
@@ -49,17 +74,19 @@ final class AlarmDetailViewModel: ViewModelType {
         Observable.combineLatest(_currentAlarm, _toggleDeadline)
             .map { [weak self] alarm, toggle -> [AlarmDetailSectionModel] in
                 guard let self = self else { return [] }
+                self.dataConveyingBag = DisposeBag()
                 
                 var deadlineSectionItems: [AlarmDetailSection] = []
+                let cellModel = AlarmCellModel(model: alarm)
                 if toggle {
                     deadlineSectionItems =  [.deadlineDate(self.deadlineDateViewModel(alarm.deadlineDate)),
-                                             .interval(.init(title: "알람주기", value: AlarmCellModel(model: alarm).interval))]
+                                             .interval(.init(title: "알람주기", value: cellModel.interval))]
                 }
                 
                 return [
                     AlarmDetailSectionModel(header: .none, items: [.wakeUpDate(self.wakeUpDateViewModel(alarm.wakeUpDate)),
-                                                                   .repeat(.init(title: "반복", value: AlarmCellModel(model: alarm).repeatDays)),
-                                                                   .comment(.init(title: "메세지", value: alarm.comment))]),
+                                                                   .repeat(.init(title: "반복", value: cellModel.repeatDays)),
+                                                                   .comment(.init(title: "메세지", value: cellModel.comment))]),
                     AlarmDetailSectionModel(header: .repeat, items: deadlineSectionItems)
                 ]
             }
@@ -67,43 +94,45 @@ final class AlarmDetailViewModel: ViewModelType {
             .disposed(by: bag)
     }
 
-    private lazy var wakeUpDateViewModel: ((_ date: Date) -> AlarmDetailDateSectionViewModel) = { [weak self] in
-        return { date in
+    private lazy var wakeUpDateViewModel: ((_ date: Date) -> AlarmDetailDateSectionViewModel) = {
+        return { [weak self] date in
             guard let self = self else { return AlarmDetailDateSectionViewModel(title: "") }
+            
             let dateViewModel = AlarmDetailDateSectionViewModel(title: "기상시간", date: date)
             dateViewModel.changedDate
                 .withLatestFrom(self._currentAlarm) { (changedDate: $0, alarm: $1) }
-                .subscribe(onNext: { date, alarm in
+                .subscribe(onNext: { [weak self] date, alarm in
                     var newAlarm = alarm
                     newAlarm.wakeUpDate = date
-                    self._currentAlarm.accept(newAlarm)
+                    self?._currentAlarm.accept(newAlarm)
                 })
-                .disposed(by: self.bag)
+                .disposed(by: self.dataConveyingBag)
             
             return dateViewModel
         }
     }()
     
-    private lazy var deadlineDateViewModel: ((_ date: Date?) -> AlarmDetailDateSectionViewModel) = { [weak self] in
-        return { date in
+    private lazy var deadlineDateViewModel: ((_ date: Date?) -> AlarmDetailDateSectionViewModel) = {
+        return { [weak self] date in
             guard let self = self else { return AlarmDetailDateSectionViewModel(title: "") }
+            
             let dateViewModel = AlarmDetailDateSectionViewModel(title: "외출시간", date: date)
             dateViewModel.changedDate
                 .withLatestFrom(self._currentAlarm) { (changedDate: $0, alarm: $1) }
-                .subscribe(onNext: { date, alarm in
+                .subscribe(onNext: { [weak self] date, alarm in
                     var newAlarm = alarm
                     newAlarm.deadlineDate = date
-                    self._currentAlarm.accept(newAlarm)
+                    self?._currentAlarm.accept(newAlarm)
                 })
-                .disposed(by: self.bag)
+                .disposed(by: self.dataConveyingBag)
             
             return dateViewModel
         }
     }()
     
-    private lazy var changedComment: ((String) -> Void)? = { [weak self] in
-        guard let self = self else { return nil }
-        return { comment in
+    private lazy var changedComment: ((String) -> Void)? = {
+        return { [weak self] comment in
+            guard let self = self else { return }
             var alarm = self._currentAlarm.value
             alarm.comment = comment
             self._currentAlarm.accept(alarm)
@@ -126,11 +155,11 @@ extension AlarmDetailViewModel {
                     
                     switch row {
                     case .interval:
-                        return .editInterval(dataSource: viewModel.editIntervalDataSource)
+                        return .editInterval(component: EditIntervalComponent(dataSource: viewModel.editIntervalDataSource))
                     case .repeat:
-                        return .editRepeatDays(dataSource: viewModel.editRepeatDaysDataSource)
+                        return .editRepeatDays(component: EditRepeatDaysComponent(dataSource: viewModel.editRepeatDaysDataSource))
                     case .comment:
-                        return .editComment(previous: viewModel._currentAlarm.value.comment, completion: viewModel.changedComment)
+                        return .editComment(component: EditCommentComponent(previousComment: viewModel._currentAlarm.value.comment, editCompletion: viewModel.changedComment))
                     default:
                         return nil
                     }
@@ -149,7 +178,21 @@ extension AlarmDetailViewModel {
                     return .empty()
                 }
                 .subscribe(onNext: {
-                    viewModel._completeSubmit.onNext(())
+                    let newAlarm = viewModel._currentAlarm.value
+                    let tts = TTSRecorder(text: newAlarm.comment)
+                    AudioFileManager.shared.saveFile(fileName: newAlarm.id,
+                                                     utterance: tts.utterance) { result in
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .success:
+                                viewModel._completeSubmit.onNext(())
+                                AlarmReservationCenter.shared.reserve(newAlarm)
+                            case .failure(let error):
+                                //TODO: - messaging
+                                print("file save error: ", error.localizedDescription)
+                            }
+                        }
+                    }
                 })
                 .disposed(by: viewModel.bag)
         }
@@ -232,9 +275,5 @@ extension AlarmDetailViewModel {
             self._currentAlarm.accept(alarm)
         }
         return dataSource
-    }
-    
-    private var defaultAlarm: Alarm {
-        Alarm(comment: "Alarm", wakeUpDate: Date(), deadlineDate: nil, notificationIntervalMinute: nil, soundFileName: nil, repeatDays: nil, enable: false)
     }
 }

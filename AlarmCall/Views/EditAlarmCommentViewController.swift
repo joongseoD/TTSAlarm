@@ -10,9 +10,9 @@ import RxSwift
 import RxCocoa
 import RxDataSources
 
-class EditAlarmCommentViewController: UIViewController, ViewControllerType {
+class EditAlarmCommentViewController: UIViewController, ViewController {
 
-    lazy var textView: UITextView = {
+    private let textView: UITextView = {
         let textView = UITextView()
         let color = UIColor(white: 20.0 / 255.0, alpha: 1.0)
         textView.layer.cornerRadius = 15
@@ -26,7 +26,7 @@ class EditAlarmCommentViewController: UIViewController, ViewControllerType {
         return textView
     }()
     
-    lazy var speakButton: UIButton = {
+    private let speakButton: UIButton = {
         let button = UIButton()
         button.setTitle("들어보기", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 19)
@@ -36,16 +36,29 @@ class EditAlarmCommentViewController: UIViewController, ViewControllerType {
         return button
     }()
     
-    lazy var doneButton: UIBarButtonItem = {
+    private let doneButton: UIBarButtonItem = {
         let button = UIBarButtonItem()
         button.style = .done
         button.title = "완료"
         return button
     }()
     
-    var viewModel: EditAlarmCommentViewModel!
+    private var bag = DisposeBag()
+    private let viewModel: EditAlarmCommentViewModel
     
-    var bag = DisposeBag()
+    init(viewModel: EditAlarmCommentViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()

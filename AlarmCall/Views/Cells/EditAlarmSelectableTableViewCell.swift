@@ -9,13 +9,13 @@ import UIKit
 
 final class EditAlarmSelectableTableViewCell: UITableViewCell {
     
-    lazy var titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         
         return label
     }()
     
-    lazy var selectImageView: UIImageView = {
+    let selectImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .blue
         return imageView
@@ -29,6 +29,10 @@ final class EditAlarmSelectableTableViewCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
     
     private func setUpLayout() {

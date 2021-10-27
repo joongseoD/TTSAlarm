@@ -8,9 +8,15 @@
 import RxSwift
 import RxCocoa
 
-final class EditAlarmIntervalViewModel: EditViewModelType, ViewModelType {
+protocol EditAlarmIntervalViewModelDependency {
+    var dataSource: EditViewModelDataSource<Int> { get }
+}
+
+final class EditAlarmIntervalViewModel: EditViewModelType, ViewModel {
     
     typealias Element = Int
+    
+    private let dependency: EditAlarmIntervalViewModelDependency
     
     var dataSource: EditViewModelDataSource<Element>
     
@@ -20,22 +26,21 @@ final class EditAlarmIntervalViewModel: EditViewModelType, ViewModelType {
     
     var selectedIndex: Binder<IndexPath> {
         return Binder<IndexPath>(self) { viewModel, indexPath in
-            Observable.just(indexPath.item)
-                .withLatestFrom(viewModel._values) { selectedIndex, values -> WrappedItem<Element> in
-                    return values[selectedIndex]
-                }
-                .subscribe(onNext: { wrappedItem in
-                    viewModel.changeValues([wrappedItem.item])
-                })
-                .disposed(by: viewModel.bag)
+            let wrappedItem = viewModel._values.value[indexPath.item]
+            viewModel.changeValues([wrappedItem.item])
         }
     }
     
     var bag = DisposeBag()
     
-    init(dataSource: EditViewModelDataSource<Element>) {
-        self.dataSource = dataSource
+    init(dependency: EditAlarmIntervalViewModelDependency) {
+        self.dependency = dependency
+        self.dataSource = dependency.dataSource
         
         bindDataSource()
+    }
+    
+    deinit {
+        print("deinit \(String(describing: self))")
     }
 }
