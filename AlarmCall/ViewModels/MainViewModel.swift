@@ -9,23 +9,23 @@ import RxSwift
 import RxCocoa
 
 protocol MainViewModelDependency: AnyObject {
-    var servicing: AlarmServiging { get }
+    var servicing: AlarmServicing { get }
 }
 
 final class RootComponent: MainViewModelDependency {
-    var servicing: AlarmServiging
+    var servicing: AlarmServicing
     
-    init(servicing: AlarmServiging) {
+    init(servicing: AlarmServicing) {
         self.servicing = servicing
     }
 }
 
 final class MainComponent: AlarmDetailViewModelDependency {
-    var servicing: AlarmServiging
+    var servicing: AlarmServicing
     var alarmId: String?
     var editCompletion: (() -> Void)?
 
-    init(servicing: AlarmServiging, alarmId: String?, editCompletion: (() -> Void)?) {
+    init(servicing: AlarmServicing, alarmId: String?, editCompletion: (() -> Void)?) {
         self.servicing = servicing
         self.alarmId = alarmId
         self.editCompletion = editCompletion
@@ -33,7 +33,7 @@ final class MainComponent: AlarmDetailViewModelDependency {
 }
 
 final class MainViewModel: ViewModel {
-    private let service: AlarmServiging
+    private let service: AlarmServicing
     private let _alarmSectionModel = BehaviorSubject<[AlarmSectionModel]>(value: [])
     private let _alarmList = BehaviorRelay<[Alarm]>(value: [])
     private let _message = PublishSubject<String>()
@@ -51,8 +51,9 @@ final class MainViewModel: ViewModel {
         let moveToNewAlarm = _addNewAlarm.map { Optional<Alarm>(nil) }
             
         return Observable.merge(selectedAlarm, moveToNewAlarm)
-            .map {
-                MainComponent(servicing: AlarmService(), alarmId: $0?.id) { [weak self] in
+            .compactMap { [weak self] in
+                guard let self = self else { return nil }
+                return MainComponent(servicing: self.service, alarmId: $0?.id) { [weak self] in
                     self?._refresh.onNext(())
                 }
             }

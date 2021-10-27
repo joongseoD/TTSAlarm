@@ -7,25 +7,22 @@
 
 import Foundation
 
-protocol DataBaseManaging {
-    associatedtype Key: Hashable
-    associatedtype Value
-    
+protocol DataBaseManaging: AnyObject {
     init(key: DataBaseKeys)
     
-    func append(newData: Value, id: Key)
+    func append(newData: Data, id: String)
     
-    func allData() -> [Key:Value]?
+    func allData() -> [String:Data]?
     
-    func select(with id: Key) -> Value?
+    func select(with id: String) -> Data?
     
-    func update(_ data: Value, id: Key) -> Bool
+    func update(_ data: Data, id: String) -> Bool
     
-    func delete(with id: Key) -> Value?
+    func delete(with id: String) -> Data?
 }
 
 extension DataBaseManaging {
-    func select(with id: Key) -> Value? {
+    func select(with id: String) -> Data? {
         guard let datas = allData() else { return nil }
         return datas[id]
     }
@@ -35,11 +32,11 @@ enum DataBaseKeys: String {
     case AlarmList
 }
 
-final class DataBaseManager<Key: Hashable, Value>: DataBaseManaging {
-    typealias Key = Key
-    typealias Value = Value
+final class DataBaseManager: DataBaseManaging {
+    typealias Key = String
+    typealias Value = Data
     
-    private let key: String
+    private let key: Key
     
     init(key: DataBaseKeys) {
         self.key = key.rawValue
@@ -79,11 +76,11 @@ final class DataBaseManager<Key: Hashable, Value>: DataBaseManaging {
     }
 }
 
-final class MockDataBaseManager<Key: Hashable, Value>: DataBaseManaging {
-    typealias Key = Key
-    typealias Value = Value
+final class MockDataBaseManager: DataBaseManaging {
+    typealias Key = String
+    typealias Value = Data
     
-    private let key: String
+    private let key: Key
     private var mockData: [Key:Value] = [:]
     init(key: DataBaseKeys) {
         self.key = key.rawValue

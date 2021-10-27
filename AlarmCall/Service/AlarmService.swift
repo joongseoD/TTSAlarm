@@ -21,7 +21,9 @@ enum AlarmServiceError: Error, CustomStringConvertible {
     }
 }
 
-protocol AlarmServiging {
+protocol AlarmServicing: AnyObject {
+    var dbms: DataBaseManaging { get set }
+    
     func append(_ items: [Alarm]) -> Observable<Void>
     
     func append(_ alarm: Alarm) -> Observable<Void>
@@ -33,12 +35,11 @@ protocol AlarmServiging {
     func update(_ alarm: Alarm, id: String) -> Observable<Void>
     
     func delete(id: String) -> Observable<Void>
+    
+    func saveAudioFile(alarm: Alarm) -> Observable<Result<Void, FileError>>
 }
 
-final class AlarmService: AlarmServiging {
-    
-    private let dbms = DataBaseManager<String, Data>(key: .AlarmList)
-    
+extension AlarmServicing {
     func append(_ items: [Alarm]) -> Observable<Void> {
         return Observable<Void>.create { [weak self] observer in
             for item in items {
@@ -118,8 +119,6 @@ final class AlarmService: AlarmServiging {
                 return Disposables.create()
             }
             
-            
-            
             if self.dbms.update(data, id: id) {
                 observer.onNext(())
                 observer.onCompleted()
@@ -146,3 +145,30 @@ final class AlarmService: AlarmServiging {
         
     }
 }
+
+final class AlarmService: AlarmServicing {
+    var dbms: DataBaseManaging = DataBaseManager(key: .AlarmList)
+    
+    func saveAudioFile(alarm: Alarm) -> Observable<Result<Void, FileError>> {
+        return Observable.create { observer in
+            let tts = TTSRecorder(text: alarm.comment)
+            AudioFileManager.shared.saveFile(fileName: alarm.id,
+                                             utterance: tts.utterance) { result in
+                observer.onNext(result)
+                observer.onCompleted()
+            }
+            return Disposables.create()
+        }
+    }
+    
+}
+
+//MARK: - For Test
+final class MockAlarmService: AlarmServicing {
+    var dbms: DataBaseManaging = MockDataBaseManager(key: .AlarmList)
+    
+    func saveAudioFile(alarm: Alarm) -> Observable<Result<Void, FileError>> {
+        return .just(.success(()))
+    }
+}
+

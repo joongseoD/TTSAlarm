@@ -9,7 +9,7 @@ import RxSwift
 import RxCocoa
 
 protocol AlarmDetailViewModelDependency: AnyObject {
-    var servicing: AlarmServiging { get }
+    var servicing: AlarmServicing { get }
     var alarmId: String? { get }
     var editCompletion: (() -> Void)? { get }
 }
@@ -29,7 +29,7 @@ struct EditCommentComponent: EditAlarmCommentViewModelDependency {
 }
 
 final class AlarmDetailViewModel: ViewModel {
-    private let service: AlarmServiging
+    private let service: AlarmServicing
     private let _sectionModels = BehaviorRelay<[AlarmDetailSectionModel]>(value: [])
     private let _toggleDeadline = BehaviorRelay<Bool>(value: false)
     private let _moveToEdit = BehaviorRelay<Destination?>(value: nil)
@@ -177,21 +177,17 @@ extension AlarmDetailViewModel {
                     //TODO: 에러처리
                     return .empty()
                 }
-                .subscribe(onNext: {
-                    let newAlarm = viewModel._currentAlarm.value
-                    let tts = TTSRecorder(text: newAlarm.comment)
-                    AudioFileManager.shared.saveFile(fileName: newAlarm.id,
-                                                     utterance: tts.utterance) { result in
-                        DispatchQueue.main.async {
-                            switch result {
-                            case .success:
-                                viewModel._completeSubmit.onNext(())
-                                AlarmReservationCenter.shared.reserve(newAlarm)
-                            case .failure(let error):
-                                //TODO: - messaging
-                                print("file save error: ", error.localizedDescription)
-                            }
-                        }
+                .compactMap { [weak self] _ in self?._currentAlarm.value }
+                .observe(on: ConcurrentDispatchQueueScheduler(queue: .global()))
+                .flatMap(viewModel.service.saveAudioFile(alarm:))
+                .observe(on: MainScheduler.instance)
+                .subscribe(onNext: { result in
+                    switch result {
+                    case .success:
+                        viewModel._completeSubmit.onNext(())
+                    case .failure(let error):
+                        //TODO: - messaging
+                        print("file save error: ", error.localizedDescription)
                     }
                 })
                 .disposed(by: viewModel.bag)
@@ -219,6 +215,10 @@ extension AlarmDetailViewModel {
     var completeSubmit: Observable<Void> {
         return _completeSubmit
             .do(onNext: { [weak self] in
+                if let newAlarm = self?._currentAlarm.value {
+                    AlarmReservationCenter.shared.reserve(newAlarm)
+                }
+
                 self?.alarmCompletion?()
             })
             .asObservable()

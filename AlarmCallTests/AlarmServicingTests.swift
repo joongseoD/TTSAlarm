@@ -17,7 +17,7 @@ class AlarmServicingTests: XCTestCase {
     
     let testScheduler = TestScheduler(initialClock: 0)
     var bag = DisposeBag()
-    var service: AlarmServiging!
+    var service: AlarmServicing!
     var alarms: [Alarm]!
     
     override func setUpWithError() throws {
@@ -171,54 +171,3 @@ class AlarmServicingTests: XCTestCase {
         testScheduler.stop()
     }
 }
-
-final class MockAlarmService: AlarmServiging {
-    private let dbms = MockDataBaseManager<String, Data>(key: .AlarmList)
-    
-    func append(_ items: [Alarm]) -> Observable<Void> {
-        for item in items {
-            guard let encodedData = try? Coder.encode(item) else { return .error(AlarmServiceError.encode) }
-            dbms.append(newData: encodedData, id: item.id)
-        }
-        return .just(())
-    }
-    
-    func append(_ alarm: Alarm) -> Observable<Void> {
-        guard let encodedData = try? Coder.encode(alarm) else { return .error(AlarmServiceError.encode) }
-        dbms.append(newData: encodedData, id: alarm.id)
-        return .just(())
-    }
-    
-    func alarmList() -> Observable<[Alarm]> {
-        guard let datas = dbms.allData() else { return .just([]) }
-        let models = datas.compactMap { data -> Alarm? in
-            return try? Coder.model(encodedData: data.value)
-        }
-        return .just(models)
-    }
-    
-    func alarm(with id: String) -> Observable<Alarm> {
-        return alarmList()
-            .compactMap {
-                return $0.filter { $0.id == id }.first
-            }
-    }
-    
-    func update(_ alarm: Alarm, id: String) -> Observable<Void> {
-        guard let data = try? Coder.encode(alarm) else { return .error(AlarmServiceError.encode) }
-        if dbms.update(data, id: id) {
-            return .just(())
-        } else {
-            return .error(AlarmServiceError.notFound)
-        }
-    }
-    
-    func delete(id: String) -> Observable<Void> {
-        if dbms.delete(with: id) != nil {
-            return .just(())
-        } else {
-            return .error(AlarmServiceError.notFound)
-        }
-    }
-}
-
