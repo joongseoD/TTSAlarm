@@ -57,15 +57,7 @@ final class MainViewModel: ViewModel {
                     self?._refresh.onNext(())
                 }
             }
-            .asDriver { _ in
-                return .empty()
-            }
-    }()
-    
-    lazy var refresh: (() -> Void)? = { [weak self] in
-        return {
-            self?._refresh.onNext(())
-        }
+            .asDriver { _ in .empty() }
     }()
     
     private var disposeBag = DisposeBag()
@@ -88,6 +80,7 @@ final class MainViewModel: ViewModel {
                 guard let self = self else { return .empty() }
                 return self.service.alarmList()
             }
+            .observe(on: MainScheduler.instance)
             .bind(to: _alarmList)
             .disposed(by: disposeBag)
         
@@ -134,13 +127,16 @@ extension MainViewModel {
                         return .just(nil)
                     }
             }
+            .observe(on: ConcurrentDispatchQueueScheduler(queue: .global()))
             .subscribe(onNext: { [weak self] update in
                 guard let self = self,
                       let update = update else { return }
                 var list = self._alarmList.value
                 guard let index = list.firstIndex(where: { $0.id == update.id }) else { return }
-                list.remove(at: index)
-                list.insert(update, at: index)
+                DispatchQueue.main.async {
+                    list.remove(at: index)
+                    list.insert(update, at: index)
+                }
             })
             .disposed(by: disposeBag)
     }

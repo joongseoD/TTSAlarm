@@ -13,7 +13,7 @@ protocol EditViewModelType: ViewModel {
 
     var dataSource: EditViewModelDataSource<Element> { get set }
     
-    var _values: BehaviorRelay<[WrappedItem<Element>]> { get set }
+    var _values: BehaviorRelay<[SelectableItem<Element>]> { get set }
     
     var _changedValues: PublishSubject<[Element]> { get set }
     
@@ -27,11 +27,11 @@ protocol EditViewModelType: ViewModel {
 extension EditViewModelType {
     func bindDataSource() {
         Observable.merge(.just(dataSource.previousValues), _changedValues.map { Optional($0) })
-            .compactMap { [weak self] selectedValues -> [WrappedItem<Element>] in
+            .compactMap { [weak self] selectedValues -> [SelectableItem<Element>] in
                 guard let self = self else { return [] }
                 return self.dataSource.values.map { item in
                     let isContains = selectedValues?.contains(item) ?? false
-                    return WrappedItem(item: item, isSelected: isContains)
+                    return SelectableItem(item: item, isSelected: isContains)
                 }
             }
             .bind(to: _values)
@@ -44,7 +44,7 @@ extension EditViewModelType {
             .disposed(by: bag)
     }
     
-    var items: Driver<[WrappedItem<Element>]> {
+    var items: Driver<[SelectableItem<Element>]> {
         return _values.asDriver()
     }
     
@@ -53,7 +53,7 @@ extension EditViewModelType {
     }
 }
 
-struct WrappedItem<T> {
+struct SelectableItem<T> {
     let item: T
     var isSelected: Bool = false
 }

@@ -18,7 +18,7 @@ final class EditAlarmRepeatDaysViewModel: EditViewModelType {
     
     var dataSource: EditViewModelDataSource<Element>
     
-    var _values = BehaviorRelay<[WrappedItem<Element>]>(value: [])
+    var _values = BehaviorRelay<[SelectableItem<Element>]>(value: [])
     
     var _changedValues = PublishSubject<[Element]>()
     

@@ -52,17 +52,18 @@ final class AlarmDetailViewModel: ViewModel {
         self.alarmId = dependency.alarmId
         self.alarmCompletion = dependency.editCompletion
         
-        setUp()
-        setUpCurrentAlarm(alarmId)
+        setupCurrentAlarm(alarmId)
+        setupSectionModels()
     }
     
-    private func setUpCurrentAlarm(_ alarmId: String?) {
+    private func setupCurrentAlarm(_ alarmId: String?) {
         guard let alarmId = alarmId else { return }
         service.alarm(with: alarmId)
             .catch { [weak self] error in
                 guard let self = self else { return .empty() }
                 return .just(self.defaultAlarm)
             }
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] alarm in
                 self?._currentAlarm.accept(alarm)
                 self?._toggleDeadline.accept(alarm.deadlineDate != nil)
@@ -70,23 +71,26 @@ final class AlarmDetailViewModel: ViewModel {
             .disposed(by: bag)
     }
     
-    private func setUp() {
+    private func setupSectionModels() {
         Observable.combineLatest(_currentAlarm, _toggleDeadline)
             .map { [weak self] alarm, toggle -> [AlarmDetailSectionModel] in
                 guard let self = self else { return [] }
                 self.dataConveyingBag = DisposeBag()
                 
-                var deadlineSectionItems: [AlarmDetailSection] = []
                 let cellModel = AlarmCellModel(model: alarm)
+                
+                var deadlineSectionItems: [AlarmDetailSection] = []
                 if toggle {
                     deadlineSectionItems =  [.deadlineDate(self.deadlineDateViewModel(alarm.deadlineDate)),
                                              .interval(.init(title: "알람주기", value: cellModel.interval))]
                 }
                 
                 return [
-                    AlarmDetailSectionModel(header: .none, items: [.wakeUpDate(self.wakeUpDateViewModel(alarm.wakeUpDate)),
-                                                                   .repeat(.init(title: "반복", value: cellModel.repeatDays)),
-                                                                   .comment(.init(title: "메세지", value: cellModel.comment))]),
+                    AlarmDetailSectionModel(header: .none, items: [
+                        .wakeUpDate(self.wakeUpDateViewModel(alarm.wakeUpDate)),
+                        .repeat(.init(title: "반복", value: cellModel.repeatDays)),
+                        .comment(.init(title: "메세지", value: cellModel.comment))
+                    ]),
                     AlarmDetailSectionModel(header: .repeat, items: deadlineSectionItems)
                 ]
             }
@@ -178,7 +182,6 @@ extension AlarmDetailViewModel {
                     return .empty()
                 }
                 .compactMap { [weak self] _ in self?._currentAlarm.value }
-                .observe(on: ConcurrentDispatchQueueScheduler(queue: .global()))
                 .flatMap(viewModel.service.saveAudioFile(alarm:))
                 .observe(on: MainScheduler.instance)
                 .subscribe(onNext: { result in
